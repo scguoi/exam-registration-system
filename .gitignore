@@ -138,3 +138,9 @@ docker/redis/logs/
 
 # Docker 临时文件
 .docker/
+
+# ===========================
+# Claude Code
+# ===========================
+# Local settings (user-specific configurations)
+.claude/settings.local.json
