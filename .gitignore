@@ -125,3 +125,16 @@ logs/
 application-local.properties
 application-local.yml
 config/local.json
+
+# ===========================
+# Docker
+# ===========================
+# Docker 数据持久化目录
+data/
+
+# Docker 日志
+docker/mysql/logs/
+docker/redis/logs/
+
+# Docker 临时文件
+.docker/

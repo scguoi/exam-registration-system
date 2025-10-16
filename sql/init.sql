@@ -3,14 +3,9 @@
 -- 数据库: exam_registration_system
 -- 版本: v1.0
 -- 日期: 2025-10-16
+-- 说明: 此脚本由 docker-compose 在容器首次启动时自动执行
+--       数据库已由 MYSQL_DATABASE 环境变量自动创建
 -- ============================================================
-
--- 创建数据库
-CREATE DATABASE IF NOT EXISTS `exam_registration_system`
-DEFAULT CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
-
-USE `exam_registration_system`;
 
 -- ============================================================
 -- 1. 用户表 (sys_user)
