@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.exam.mapper.ExamMapper">
+
+    <select id="selectExamPage" resultType="com.exam.entity.Exam">
+        SELECT * FROM exam
+        <where>
+            <if test="examName != null and examName != ''">
+                AND exam_name LIKE CONCAT('%', #{examName}, '%')
+            </if>
+            <if test="examType != null and examType != ''">
+                AND exam_type = #{examType}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="selectAvailableExamPage" resultType="com.exam.entity.Exam">
+        SELECT * FROM exam
+        WHERE status IN (2, 3)
+        AND registration_start &lt;= #{currentTime}
+        AND registration_end &gt;= #{currentTime}
+        <if test="examName != null and examName != ''">
+            AND exam_name LIKE CONCAT('%', #{examName}, '%')
+        </if>
+        <if test="examType != null and examType != ''">
+            AND exam_type = #{examType}
+        </if>
+        ORDER BY exam_date ASC
+    </select>
+
+    <update id="incrementCurrentCount">
+        UPDATE exam SET current_count = current_count + 1 WHERE id = #{examId}
+    </update>
+
+    <update id="decrementCurrentCount">
+        UPDATE exam SET current_count = current_count - 1 WHERE id = #{examId}
+    </update>
+
+</mapper>

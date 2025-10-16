@@ -311,6 +311,205 @@ INSERT INTO `notice` (
 );
 
 -- ============================================================
+-- 7. 创建MyBatis Plus自动填充处理器需要的配置
+-- ============================================================
+
+-- 创建自动填充配置表（可选，用于记录自动填充的配置）
+CREATE TABLE IF NOT EXISTS `mybatis_plus_config` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT,
+  `config_key` VARCHAR(100) NOT NULL,
+  `config_value` TEXT,
+  `description` VARCHAR(255),
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_config_key` (`config_key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='MyBatis Plus配置表';
+
+-- ============================================================
+-- 8. 创建索引优化
+-- ============================================================
+
+-- 为经常查询的字段添加复合索引
+ALTER TABLE `registration` ADD INDEX `idx_user_audit_status` (`user_id`, `audit_status`);
+ALTER TABLE `registration` ADD INDEX `idx_exam_payment_status` (`exam_id`, `payment_status`);
+ALTER TABLE `payment_order` ADD INDEX `idx_user_status` (`user_id`, `status`);
+ALTER TABLE `payment_order` ADD INDEX `idx_exam_status` (`exam_id`, `status`);
+
+-- ============================================================
+-- 9. 创建视图（用于统计查询）
+-- ============================================================
+
+-- 考试报名统计视图
+CREATE VIEW `v_exam_registration_stats` AS
+SELECT 
+    e.id as exam_id,
+    e.exam_name,
+    e.exam_type,
+    e.exam_date,
+    e.total_quota,
+    e.current_count,
+    COUNT(r.id) as total_registrations,
+    SUM(CASE WHEN r.audit_status = 1 THEN 1 ELSE 0 END) as pending_audit,
+    SUM(CASE WHEN r.audit_status = 2 THEN 1 ELSE 0 END) as approved,
+    SUM(CASE WHEN r.audit_status = 3 THEN 1 ELSE 0 END) as rejected,
+    SUM(CASE WHEN r.payment_status = 2 THEN 1 ELSE 0 END) as paid
+FROM exam e
+LEFT JOIN registration r ON e.id = r.exam_id
+GROUP BY e.id, e.exam_name, e.exam_type, e.exam_date, e.total_quota, e.current_count;
+
+-- 用户报名统计视图
+CREATE VIEW `v_user_registration_stats` AS
+SELECT 
+    u.id as user_id,
+    u.username,
+    u.real_name,
+    COUNT(r.id) as total_registrations,
+    SUM(CASE WHEN r.audit_status = 2 THEN 1 ELSE 0 END) as approved_count,
+    SUM(CASE WHEN r.payment_status = 2 THEN 1 ELSE 0 END) as paid_count
+FROM sys_user u
+LEFT JOIN registration r ON u.id = r.user_id
+WHERE u.role = 'user'
+GROUP BY u.id, u.username, u.real_name;
+
+-- ============================================================
+-- 10. 创建存储过程（用于生成准考证号）
+-- ============================================================
+
+DELIMITER $$
+
+CREATE PROCEDURE `GenerateAdmissionTicketNo`(
+    IN p_exam_id BIGINT,
+    IN p_site_id BIGINT,
+    OUT p_ticket_no VARCHAR(50)
+)
+BEGIN
+    DECLARE v_exam_code VARCHAR(4);
+    DECLARE v_site_code VARCHAR(4);
+    DECLARE v_sequence INT;
+    DECLARE v_ticket_no VARCHAR(50);
+    
+    -- 获取考试代码（取考试ID的后4位，不足4位前面补0）
+    SET v_exam_code = LPAD(p_exam_id % 10000, 4, '0');
+    
+    -- 获取考点代码（取考点ID的后4位，不足4位前面补0）
+    SET v_site_code = LPAD(p_site_id % 10000, 4, '0');
+    
+    -- 获取该考点该考试的下一个序号
+    SELECT COALESCE(MAX(CAST(SUBSTRING(admission_ticket_no, 9, 6) AS UNSIGNED)), 0) + 1
+    INTO v_sequence
+    FROM registration 
+    WHERE exam_id = p_exam_id 
+    AND exam_site_id = p_site_id 
+    AND admission_ticket_no IS NOT NULL;
+    
+    -- 生成准考证号：考试代码(4位) + 考点代码(4位) + 序号(6位)
+    SET v_ticket_no = CONCAT(v_exam_code, v_site_code, LPAD(v_sequence, 6, '0'));
+    
+    -- 检查准考证号是否已存在，如果存在则递增序号
+    WHILE EXISTS(SELECT 1 FROM registration WHERE admission_ticket_no = v_ticket_no) DO
+        SET v_sequence = v_sequence + 1;
+        SET v_ticket_no = CONCAT(v_exam_code, v_site_code, LPAD(v_sequence, 6, '0'));
+    END WHILE;
+    
+    SET p_ticket_no = v_ticket_no;
+END$$
+
+DELIMITER ;
+
+-- ============================================================
+-- 11. 创建触发器（用于自动更新统计信息）
+-- ============================================================
+
+-- 报名表插入触发器：自动增加考试和考点的报名人数
+DELIMITER $$
+
+CREATE TRIGGER `tr_registration_after_insert` 
+AFTER INSERT ON `registration`
+FOR EACH ROW
+BEGIN
+    -- 增加考试报名人数
+    UPDATE exam SET current_count = current_count + 1 WHERE id = NEW.exam_id;
+    
+    -- 增加考点报名人数
+    IF NEW.exam_site_id IS NOT NULL THEN
+        UPDATE exam_site SET current_count = current_count + 1 WHERE id = NEW.exam_site_id;
+    END IF;
+END$$
+
+-- 报名表删除触发器：自动减少考试和考点的报名人数
+CREATE TRIGGER `tr_registration_after_delete` 
+AFTER DELETE ON `registration`
+FOR EACH ROW
+BEGIN
+    -- 减少考试报名人数
+    UPDATE exam SET current_count = current_count - 1 WHERE id = OLD.exam_id;
+    
+    -- 减少考点报名人数
+    IF OLD.exam_site_id IS NOT NULL THEN
+        UPDATE exam_site SET current_count = current_count - 1 WHERE id = OLD.exam_site_id;
+    END IF;
+END$$
+
+DELIMITER ;
+
+-- ============================================================
+-- 12. 插入更多测试数据
+-- ============================================================
+
+-- 插入更多测试考生
+INSERT INTO `sys_user` (
+  `username`, `password`, `real_name`, `phone`, `role`, `status`, `create_time`
+) VALUES 
+('13800138001', '$2a$10$EblZqNptyYvcLm/VwDCVAuBjzZOI7khzdyGPBr/w0wTRaI5p2S5K.', '李四', '13800138001', 'user', 1, NOW()),
+('13800138002', '$2a$10$EblZqNptyYvcLm/VwDCVAuBjzZOI7khzdyGPBr/w0wTRaI5p2S5K.', '王五', '13800138002', 'user', 1, NOW()),
+('13800138003', '$2a$10$EblZqNptyYvcLm/VwDCVAuBjzZOI7khzdyGPBr/w0wTRaI5p2S5K.', '赵六', '13800138003', 'user', 1, NOW());
+
+-- 插入更多考试数据
+INSERT INTO `exam` (
+  `exam_name`, `exam_type`, `exam_date`, `exam_time`, `registration_start`, `registration_end`, 
+  `fee`, `description`, `notice`, `status`, `create_by`, `create_time`
+) VALUES 
+('2025年春季英语等级考试', '学业水平考试', '2025-04-20', '14:00-16:00', '2025-02-01 00:00:00', '2025-03-31 23:59:59', 
+ 120.00, '全国英语等级考试（PETS）', '请携带身份证和准考证参加考试', 2, 1, NOW()),
+('2025年春季会计资格考试', '职业资格考试', '2025-05-15', '09:00-11:30', '2025-03-01 00:00:00', '2025-04-30 23:59:59', 
+ 150.00, '初级会计专业技术资格考试', '考试时间为2.5小时，请提前30分钟到达考场', 1, 1, NOW());
+
+-- 插入更多考点数据
+INSERT INTO `exam_site` (
+  `exam_id`, `site_name`, `province`, `city`, `address`, `capacity`, `status`, `create_time`
+) VALUES 
+(2, '北京外国语大学', '北京市', '海淀区', '海淀区西三环北路2号', 300, 1, NOW()),
+(2, '上海外国语大学', '上海市', '虹口区', '虹口区大连西路550号', 350, 1, NOW()),
+(3, '中央财经大学', '北京市', '海淀区', '海淀区学院南路39号', 400, 1, NOW()),
+(3, '上海财经大学', '上海市', '杨浦区', '杨浦区国定路777号', 450, 1, NOW());
+
+-- 插入更多公告
+INSERT INTO `notice` (
+  `title`, `content`, `type`, `is_top`, `status`, `publish_time`, `create_by`, `create_time`
+) VALUES 
+('系统维护通知', '<p>系统将于本周六凌晨2:00-4:00进行维护，期间可能影响正常使用，请提前做好准备。</p>', 'notice', 0, 1, NOW(), 1, NOW()),
+('考试政策更新', '<p>根据最新政策要求，部分考试科目和考试时间有所调整，请考生关注最新通知。</p>', 'policy', 0, 1, NOW(), 1, NOW());
+
+-- ============================================================
+-- 13. 创建定时任务清理过期数据（可选）
+-- ============================================================
+
+-- 创建事件调度器（需要开启事件调度器：SET GLOBAL event_scheduler = ON;）
+-- 清理过期的支付订单（超过7天未支付的订单）
+/*
+CREATE EVENT IF NOT EXISTS `cleanup_expired_orders`
+ON SCHEDULE EVERY 1 DAY
+STARTS CURRENT_TIMESTAMP
+DO
+  UPDATE payment_order 
+  SET status = 3 
+  WHERE status = 1 
+  AND expire_time < NOW() 
+  AND create_time < DATE_SUB(NOW(), INTERVAL 7 DAY);
+*/
+
+-- ============================================================
 -- 数据库初始化完成
 -- ============================================================
 
@@ -321,3 +520,12 @@ SHOW TABLES;
 -- DESC sys_user;
 -- DESC exam;
 -- DESC registration;
+
+-- 查看视图
+-- SHOW FULL TABLES WHERE Table_type = 'VIEW';
+
+-- 查看存储过程
+-- SHOW PROCEDURE STATUS WHERE Db = 'exam_registration_system';
+
+-- 查看触发器
+-- SHOW TRIGGERS;
