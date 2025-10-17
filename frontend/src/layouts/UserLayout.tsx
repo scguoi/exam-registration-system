@@ -1,6 +1,14 @@
 import React from 'react';
 import { Layout, Menu, Avatar, Dropdown, Space } from 'antd';
-import { UserOutlined, LogoutOutlined, SettingOutlined } from '@ant-design/icons';
+import {
+  UserOutlined,
+  LogoutOutlined,
+  SettingOutlined,
+  DashboardOutlined,
+  FormOutlined,
+  FileTextOutlined,
+  DollarOutlined,
+} from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../contexts/AuthContext';
 import type { MenuProps } from 'antd';
@@ -20,22 +28,22 @@ const UserLayout: React.FC<UserLayoutProps> = ({ children }) => {
   const userMenuItems: MenuProps['items'] = [
     {
       key: '/user/dashboard',
-      icon: <UserOutlined />,
+      icon: <DashboardOutlined />,
       label: '个人中心',
     },
     {
-      key: '/user/exams',
-      icon: <UserOutlined />,
-      label: '考试列表',
+      key: '/user/apply',
+      icon: <FormOutlined />,
+      label: '考试报名',
     },
     {
       key: '/user/registrations',
-      icon: <UserOutlined />,
+      icon: <FileTextOutlined />,
       label: '我的报名',
     },
     {
       key: '/user/orders',
-      icon: <UserOutlined />,
+      icon: <DollarOutlined />,
       label: '缴费记录',
     },
   ];
