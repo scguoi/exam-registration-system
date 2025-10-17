@@ -140,8 +140,8 @@ const Login: React.FC = () => {
           color: '#666'
         }}>
           <p style={{ margin: '0 0 8px 0', fontWeight: 'bold' }}>测试账号：</p>
-          <p style={{ margin: '0 0 4px 0' }}>管理员：admin / admin123</p>
-          <p style={{ margin: '0' }}>考生：13800138000 / 123456</p>
+          <p style={{ margin: '0 0 4px 0' }}>管理员：admin / password</p>
+          <p style={{ margin: '0' }}>考生：13800138000 / password</p>
         </div>
       </Card>
     </div>
