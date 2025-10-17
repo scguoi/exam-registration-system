@@ -9,10 +9,10 @@ spring:
   main:
     allow-circular-references: true
   
-  # 数据源配置
+  # 数据源配置 - Docker环境
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/exam_registration_system?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+    url: jdbc:mysql://mysql:3306/exam_registration_system?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8&allowPublicKeyRetrieval=true
     username: root
     password: 123456
     
@@ -49,15 +49,15 @@ jwt:
 # 日志配置
 logging:
   level:
-    com.exam: debug
-    org.springframework.security: debug
+    com.exam: info
+    org.springframework.security: info
   pattern:
     console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n'
 
-# 文件存储配置
+# 文件存储配置 - Docker环境
 file:
   upload:
-    path: /Users/scguo/OpenSource/exam-registration-system/uploads/
+    path: /app/uploads/
     avatar-path: avatar/
     material-path: materials/
     exam-file-path: exam-files/

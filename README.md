@@ -87,7 +87,55 @@ exam-registration-system/
 
 ## 🚀 快速开始
 
-### 环境要求
+### 方式一：Docker Compose 部署 (推荐)
+
+#### 环境要求
+- **Docker:** 20.0+
+- **Docker Compose:** 2.0+
+
+#### 一键启动
+
+```bash
+# 1. 克隆项目
+git clone https://github.com/scguoi/exam-registration-system.git
+cd exam-registration-system
+
+# 2. 构建并启动所有服务
+docker-compose up -d
+
+# 3. 查看服务状态
+docker-compose ps
+```
+
+#### 访问系统
+- **前端页面:** http://localhost:80
+- **后端API:** http://localhost:8080/api
+- **MySQL数据库:** localhost:3306
+
+#### 常用命令
+
+```bash
+# 查看日志
+docker-compose logs -f
+
+# 重启服务
+docker-compose restart
+
+# 停止服务
+docker-compose down
+
+# 重新构建并启动
+docker-compose up -d --build
+
+# 查看特定服务日志
+docker-compose logs -f backend
+docker-compose logs -f frontend
+docker-compose logs -f mysql
+```
+
+### 方式二：本地开发部署
+
+#### 环境要求
 
 - **JDK:** 11+
 - **Node.js:** 16+
@@ -95,14 +143,14 @@ exam-registration-system/
 - **Maven:** 3.6+
 - **Git:** 2.0+
 
-### 1. 克隆项目
+#### 1. 克隆项目
 
 ```bash
 git clone https://github.com/scguoi/exam-registration-system.git
 cd exam-registration-system
 ```
 
-### 2. 初始化数据库
+#### 2. 初始化数据库
 
 ```bash
 # 登录 MySQL
@@ -115,7 +163,7 @@ source sql/init.sql
 mysql -u root -p < sql/init.sql
 ```
 
-### 3. 启动后端 (待开发)
+#### 3. 启动后端
 
 ```bash
 cd backend
@@ -125,7 +173,7 @@ mvn spring-boot:run
 
 后端服务默认运行在: `http://localhost:8080`
 
-### 4. 启动前端 (待开发)
+#### 4. 启动前端
 
 ```bash
 cd frontend
@@ -135,11 +183,59 @@ npm run dev
 
 前端服务默认运行在: `http://localhost:5173`
 
-### 5. 访问系统
+#### 5. 访问系统
 
 - **考生端:** http://localhost:5173
 - **管理端:** http://localhost:5173/admin
 - **接口文档:** http://localhost:8080/doc.html (Knife4j)
+
+---
+
+## 🐳 Docker 部署详解
+
+### 服务架构
+
+Docker Compose 包含以下服务：
+
+- **mysql**: MySQL 8.4 数据库服务
+- **backend**: Spring Boot 后端应用
+- **frontend**: React 前端应用 (Nginx)
+
+### 服务配置
+
+#### MySQL 服务
+- 端口: 3306
+- 数据库: exam_registration_system
+- 用户名: root
+- 密码: 123456
+- 数据持久化: `./data/mysql`
+
+#### 后端服务
+- 端口: 8080
+- 环境: docker
+- 数据库连接: mysql:3306
+- 文件上传目录: `./uploads`
+
+#### 前端服务
+- 端口: 80
+- 反向代理: 将 `/api/*` 请求代理到后端
+- 静态文件: React 构建产物
+
+### 健康检查
+
+所有服务都配置了健康检查：
+- MySQL: 使用 `mysqladmin ping`
+- Backend: 检查 `/api/health` 端点
+- Frontend: 检查 HTTP 响应
+
+### 数据持久化
+
+- MySQL 数据: `./data/mysql` 目录
+- 上传文件: `./uploads` 目录
+
+### 网络配置
+
+所有服务运行在 `exam-network` 网络中，服务间可以通过服务名互相访问。
 
 ---
 
