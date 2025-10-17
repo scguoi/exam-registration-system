@@ -117,6 +117,8 @@ CREATE TABLE `registration` (
   `exam_room` VARCHAR(20) DEFAULT NULL COMMENT '考场号',
   `seat_no` VARCHAR(10) DEFAULT NULL COMMENT '座位号',
   `subject` VARCHAR(100) DEFAULT NULL COMMENT '报考科目',
+  `id_card` VARCHAR(255) DEFAULT NULL COMMENT '身份证号(AES加密)',
+  `phone` VARCHAR(255) DEFAULT NULL COMMENT '手机号(AES加密)',
   `materials` TEXT COMMENT '上传材料(JSON格式存储URL数组)',
   `audit_status` TINYINT NOT NULL DEFAULT 1 COMMENT '审核状态(1-待审核 2-审核通过 3-审核驳回)',
   `audit_remark` VARCHAR(500) DEFAULT NULL COMMENT '审核备注/驳回原因',

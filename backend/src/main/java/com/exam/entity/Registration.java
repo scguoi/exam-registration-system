@@ -69,6 +69,18 @@ public class Registration implements Serializable {
     private String subject;
 
     /**
+     * 身份证号(AES加密)
+     */
+    @TableField("id_card")
+    private String idCard;
+
+    /**
+     * 手机号(AES加密)
+     */
+    @TableField("phone")
+    private String phone;
+
+    /**
      * 上传材料(JSON格式存储URL数组)
      */
     @TableField("materials")
