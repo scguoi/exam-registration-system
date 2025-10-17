@@ -1,67 +1,117 @@
 import api from './api';
-import type { Registration, RegistrationRequest, AuditRequest, ApiResponse, PageResponse } from '../types';
 
-// 提交报名
-export const submitRegistration = (data: RegistrationRequest): Promise<ApiResponse<Registration>> => {
-  return api.post('/registrations', data);
-};
+/**
+ * 报名相关API
+ */
 
-// 获取我的报名记录
-export const getMyRegistrations = (params?: {
-  pageNum?: number;
-  pageSize?: number;
-  examId?: number;
-  auditStatus?: number;
-}): Promise<ApiResponse<PageResponse<Registration>>> => {
-  return api.get('/registrations/my', { params });
-};
+// ==================== 类型定义 ====================
 
-// 获取报名详情
-export const getRegistrationDetail = (id: number): Promise<ApiResponse<Registration>> => {
-  return api.get(`/registrations/${id}`);
-};
+export interface RegistrationRequest {
+  examId: number;
+  examSiteId: number;
+  idCard: string;
+  phone: string;
+  subject?: string;
+  materials?: string;
+}
 
-// 修改报名信息
-export const updateRegistration = (id: number, data: Partial<RegistrationRequest>): Promise<ApiResponse<Registration>> => {
-  return api.put(`/registrations/${id}`, data);
-};
-
-// 获取待审核列表（管理员）
-export const getPendingRegistrations = (params?: {
-  pageNum?: number;
-  pageSize?: number;
-  examId?: number;
-  auditStatus?: number;
-  keyword?: string;
-}): Promise<ApiResponse<PageResponse<Registration>>> => {
-  return api.get('/registrations/pending', { params });
-};
-
-// 审核报名（管理员）
-export const auditRegistration = (data: AuditRequest): Promise<ApiResponse> => {
-  return api.post('/registrations/audit', data);
-};
-
-// 批量审核（管理员）
-export const batchAuditRegistrations = (data: {
-  registrationIds: number[];
-  auditStatus: number;
+export interface AuditRequest {
+  auditStatus: number; // 2-通过 3-驳回
   auditRemark?: string;
-}): Promise<ApiResponse> => {
-  return api.post('/registrations/batch-audit', data);
-};
+}
 
-// 获取报名统计（管理员）
-export const getRegistrationStatistics = (params?: {
-  examId?: number;
-  startDate?: string;
-  endDate?: string;
-}): Promise<ApiResponse<{
-  totalCount: number;
-  pendingCount: number;
-  approvedCount: number;
-  rejectedCount: number;
-  paidCount: number;
-}>> => {
-  return api.get('/registrations/statistics', { params });
-};
+export interface Registration {
+  id: number;
+  examId: number;
+  examName?: string;
+  examDate?: string;
+  examTime?: string;
+  userId: number;
+  userRealName?: string;
+  username?: string;
+  examSiteId: number;
+  siteName?: string;
+  siteAddress?: string;
+  subject?: string;
+  idCard?: string;
+  idCardMasked?: string;
+  phone?: string;
+  phoneMasked?: string;
+  materials?: string;
+  auditStatus: number;
+  auditStatusText?: string;
+  auditRemark?: string;
+  auditTime?: string;
+  paymentStatus: number;
+  paymentStatusText?: string;
+  paymentTime?: string;
+  admissionTicketNo?: string;
+  createTime: string;
+  fee?: number;
+}
+
+export interface PageResult<T> {
+  records: T[];
+  total: number;
+  current: number;
+  size: number;
+}
+
+// ==================== 考生端接口 ====================
+
+/**
+ * 提交报名
+ */
+export const submitRegistration = (data: RegistrationRequest) =>
+  api.post('/registrations', data);
+
+/**
+ * 查询我的报名记录
+ */
+export const getMyRegistrations = () =>
+  api.get('/registrations/my');
+
+/**
+ * 获取报名详情
+ */
+export const getRegistrationDetail = (id: number) =>
+  api.get(`/registrations/${id}`);
+
+/**
+ * 取消报名
+ */
+export const cancelRegistration = (id: number) =>
+  api.put(`/registrations/${id}/cancel`);
+
+// ==================== 管理员端接口 ====================
+
+/**
+ * 获取待审核报名列表（分页）
+ */
+export const getPendingRegistrations = (page: number, size: number, examId?: number) =>
+  api.get('/registrations/pending', { params: { page, size, examId } });
+
+/**
+ * 审核报名（通过/驳回）
+ */
+export const auditRegistration = (id: number, data: AuditRequest) =>
+  api.put(`/registrations/${id}/audit`, data);
+
+/**
+ * 获取所有报名列表（管理员，支持筛选）
+ */
+export const getAllRegistrations = (
+  page: number,
+  size: number,
+  auditStatus?: number,
+  examId?: number
+) =>
+  api.get('/registrations', {
+    params: { page, size, auditStatus, examId }
+  });
+
+/**
+ * 报名统计
+ */
+export const getRegistrationStats = (examId?: number) =>
+  api.get('/registrations/stats', { params: { examId } });

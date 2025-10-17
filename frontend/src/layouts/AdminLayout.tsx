@@ -40,7 +40,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       label: '考试管理',
     },
     {
-      key: '/admin/registrations',
+      key: '/admin/audit',
       icon: <FileTextOutlined />,
       label: '报名审核',
     },

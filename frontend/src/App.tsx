@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
+import AuditManagement from './pages/admin/AuditManagement';
 
 // 配置Ant Design主题
 const theme = {
@@ -50,6 +51,7 @@ const App: React.FC = () => {
                 <AdminLayout>
                   <Routes>
                     <Route path="/dashboard" element={<AdminDashboard />} />
+                    <Route path="/audit" element={<AuditManagement />} />
                     <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
                     {/* 其他管理端路由可以在这里添加 */}
                   </Routes>
