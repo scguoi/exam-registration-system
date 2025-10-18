@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import UserDashboard from './pages/UserDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import AuditManagement from './pages/admin/AuditManagement';
+import Statistics from './pages/admin/Statistics';
 import ApplyExam from './pages/user/ApplyExam';
 import MyRegistrations from './pages/user/MyRegistrations';
 import Payment from './pages/user/Payment';
@@ -60,6 +61,7 @@ const App: React.FC = () => {
                   <Routes>
                     <Route path="/dashboard" element={<AdminDashboard />} />
                     <Route path="/audit" element={<AuditManagement />} />
+                    <Route path="/statistics" element={<Statistics />} />
                     <Route path="/" element={<Navigate to="/admin/dashboard" replace />} />
                     {/* 其他管理端路由可以在这里添加 */}
                   </Routes>
