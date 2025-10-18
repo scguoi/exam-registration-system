@@ -157,7 +157,7 @@ public class PaymentOrderService {
                 }
 
                 log.info("支付成功，订单号：{}，支付方式：{}", orderNo, paymentMethod);
-                return Result.success(order, "支付成功");
+                return Result.success("支付成功", order);
             } else {
                 return Result.error("支付失败");
             }

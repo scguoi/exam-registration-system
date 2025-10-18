@@ -119,36 +119,53 @@ public class StatisticsService {
     public Map<String, Object> getRegistrationStatistics(Long examId) {
         Map<String, Object> stats = new HashMap<>();
 
-        LambdaQueryWrapper<Registration> baseWrapper = new LambdaQueryWrapper<>();
-        if (examId != null) {
-            baseWrapper.eq(Registration::getExamId, examId);
-        }
-
         // 总报名数
-        Long totalCount = registrationMapper.selectCount(baseWrapper);
+        LambdaQueryWrapper<Registration> totalWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            totalWrapper.eq(Registration::getExamId, examId);
+        }
+        Long totalCount = registrationMapper.selectCount(totalWrapper);
         stats.put("totalCount", totalCount);
 
         // 按审核状态统计
         // 1-待审核 2-审核通过 3-审核驳回
-        LambdaQueryWrapper<Registration> pendingWrapper = new LambdaQueryWrapper<>(baseWrapper);
+        LambdaQueryWrapper<Registration> pendingWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            pendingWrapper.eq(Registration::getExamId, examId);
+        }
         stats.put("pendingCount", registrationMapper.selectCount(pendingWrapper.eq(Registration::getAuditStatus, 1)));
 
-        LambdaQueryWrapper<Registration> approvedWrapper = new LambdaQueryWrapper<>(baseWrapper);
+        LambdaQueryWrapper<Registration> approvedWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            approvedWrapper.eq(Registration::getExamId, examId);
+        }
         stats.put("approvedCount", registrationMapper.selectCount(approvedWrapper.eq(Registration::getAuditStatus, 2)));
 
-        LambdaQueryWrapper<Registration> rejectedWrapper = new LambdaQueryWrapper<>(baseWrapper);
+        LambdaQueryWrapper<Registration> rejectedWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            rejectedWrapper.eq(Registration::getExamId, examId);
+        }
         stats.put("rejectedCount", registrationMapper.selectCount(rejectedWrapper.eq(Registration::getAuditStatus, 3)));
 
         // 按缴费状态统计
         // 1-未缴费 2-已缴费 3-已退费
-        LambdaQueryWrapper<Registration> unpaidWrapper = new LambdaQueryWrapper<>(baseWrapper);
+        LambdaQueryWrapper<Registration> unpaidWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            unpaidWrapper.eq(Registration::getExamId, examId);
+        }
         stats.put("unpaidCount", registrationMapper.selectCount(unpaidWrapper.eq(Registration::getPaymentStatus, 1)));
 
-        LambdaQueryWrapper<Registration> paidWrapper = new LambdaQueryWrapper<>(baseWrapper);
+        LambdaQueryWrapper<Registration> paidWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            paidWrapper.eq(Registration::getExamId, examId);
+        }
         stats.put("paidCount", registrationMapper.selectCount(paidWrapper.eq(Registration::getPaymentStatus, 2)));
 
-        LambdaQueryWrapper<Registration> refundedPaymentCount = new LambdaQueryWrapper<>(baseWrapper);
-        stats.put("refundedPaymentCount", registrationMapper.selectCount(refundedPaymentCount.eq(Registration::getPaymentStatus, 3)));
+        LambdaQueryWrapper<Registration> refundedWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            refundedWrapper.eq(Registration::getExamId, examId);
+        }
+        stats.put("refundedPaymentCount", registrationMapper.selectCount(refundedWrapper.eq(Registration::getPaymentStatus, 3)));
 
         return stats;
     }
@@ -162,27 +179,38 @@ public class StatisticsService {
     public Map<String, Object> getPaymentStatistics(Long examId) {
         Map<String, Object> stats = new HashMap<>();
 
-        LambdaQueryWrapper<PaymentOrder> baseWrapper = new LambdaQueryWrapper<>();
-        if (examId != null) {
-            baseWrapper.eq(PaymentOrder::getExamId, examId);
-        }
-
         // 总订单数
-        Long totalCount = paymentOrderMapper.selectCount(baseWrapper);
+        LambdaQueryWrapper<PaymentOrder> totalWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            totalWrapper.eq(PaymentOrder::getExamId, examId);
+        }
+        Long totalCount = paymentOrderMapper.selectCount(totalWrapper);
         stats.put("totalCount", totalCount);
 
         // 按状态统计订单数
         // 1-待支付 2-已支付 3-已关闭 4-已退款
-        LambdaQueryWrapper<PaymentOrder> unpaidWrapper = new LambdaQueryWrapper<>(baseWrapper);
+        LambdaQueryWrapper<PaymentOrder> unpaidWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            unpaidWrapper.eq(PaymentOrder::getExamId, examId);
+        }
         stats.put("unpaidCount", paymentOrderMapper.selectCount(unpaidWrapper.eq(PaymentOrder::getStatus, 1)));
 
-        LambdaQueryWrapper<PaymentOrder> paidWrapper = new LambdaQueryWrapper<>(baseWrapper);
+        LambdaQueryWrapper<PaymentOrder> paidWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            paidWrapper.eq(PaymentOrder::getExamId, examId);
+        }
         stats.put("paidCount", paymentOrderMapper.selectCount(paidWrapper.eq(PaymentOrder::getStatus, 2)));
 
-        LambdaQueryWrapper<PaymentOrder> closedWrapper = new LambdaQueryWrapper<>(baseWrapper);
+        LambdaQueryWrapper<PaymentOrder> closedWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            closedWrapper.eq(PaymentOrder::getExamId, examId);
+        }
         stats.put("closedCount", paymentOrderMapper.selectCount(closedWrapper.eq(PaymentOrder::getStatus, 3)));
 
-        LambdaQueryWrapper<PaymentOrder> refundedWrapper = new LambdaQueryWrapper<>(baseWrapper);
+        LambdaQueryWrapper<PaymentOrder> refundedWrapper = new LambdaQueryWrapper<>();
+        if (examId != null) {
+            refundedWrapper.eq(PaymentOrder::getExamId, examId);
+        }
         stats.put("refundedCount", paymentOrderMapper.selectCount(refundedWrapper.eq(PaymentOrder::getStatus, 4)));
 
         // 统计金额

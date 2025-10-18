@@ -534,7 +534,7 @@ public class RegistrationService {
             }
 
             // 总报名数
-            Integer total = registrationMapper.selectCount(wrapper);
+            Long total = registrationMapper.selectCount(wrapper);
 
             // 待审核数
             wrapper.clear();
@@ -542,7 +542,7 @@ public class RegistrationService {
                 wrapper.eq("exam_id", examId);
             }
             wrapper.eq("audit_status", 1);
-            Integer pending = registrationMapper.selectCount(wrapper);
+            Long pending = registrationMapper.selectCount(wrapper);
 
             // 已通过数
             wrapper.clear();
@@ -550,7 +550,7 @@ public class RegistrationService {
                 wrapper.eq("exam_id", examId);
             }
             wrapper.eq("audit_status", 2);
-            Integer approved = registrationMapper.selectCount(wrapper);
+            Long approved = registrationMapper.selectCount(wrapper);
 
             // 已驳回数
             wrapper.clear();
@@ -558,7 +558,7 @@ public class RegistrationService {
                 wrapper.eq("exam_id", examId);
             }
             wrapper.eq("audit_status", 3);
-            Integer rejected = registrationMapper.selectCount(wrapper);
+            Long rejected = registrationMapper.selectCount(wrapper);
 
             // 已缴费数
             wrapper.clear();
@@ -566,7 +566,7 @@ public class RegistrationService {
                 wrapper.eq("exam_id", examId);
             }
             wrapper.eq("payment_status", 2);
-            Integer paid = registrationMapper.selectCount(wrapper);
+            Long paid = registrationMapper.selectCount(wrapper);
 
             Map<String, Object> stats = new HashMap<>();
             stats.put("total", total);
