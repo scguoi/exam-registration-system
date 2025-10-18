@@ -41,6 +41,9 @@ public class RegistrationService {
     @Autowired
     private SysUserMapper userMapper;
 
+    @Autowired
+    private PaymentOrderService paymentOrderService;
+
     /**
      * 考生提交报名
      *
@@ -159,6 +162,15 @@ public class RegistrationService {
             registration.setAuditTime(LocalDateTime.now());
 
             registrationMapper.updateById(registration);
+
+            // 6. 审核通过后自动创建支付订单
+            if (auditStatus == 2) {
+                Result createOrderResult = paymentOrderService.createPaymentOrder(registrationId);
+                if (createOrderResult.getCode() != 200) {
+                    log.warn("审核通过后创建支付订单失败：{}", createOrderResult.getMessage());
+                    // 不影响审核流程，仅记录日志
+                }
+            }
 
             String message = auditStatus == 2 ? "审核通过" : "审核驳回";
             log.info("报名审核完成，registrationId={}, result={}", registrationId, message);
