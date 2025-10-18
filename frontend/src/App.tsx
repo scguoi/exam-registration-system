@@ -15,6 +15,8 @@ import AdminDashboard from './pages/AdminDashboard';
 import AuditManagement from './pages/admin/AuditManagement';
 import ApplyExam from './pages/user/ApplyExam';
 import MyRegistrations from './pages/user/MyRegistrations';
+import Payment from './pages/user/Payment';
+import PaymentOrders from './pages/user/PaymentOrders';
 
 // 配置Ant Design主题
 const theme = {
@@ -42,6 +44,8 @@ const App: React.FC = () => {
                     <Route path="/dashboard" element={<UserDashboard />} />
                     <Route path="/apply" element={<ApplyExam />} />
                     <Route path="/registrations" element={<MyRegistrations />} />
+                    <Route path="/payment/:registrationId" element={<Payment />} />
+                    <Route path="/orders" element={<PaymentOrders />} />
                     <Route path="/" element={<Navigate to="/user/dashboard" replace />} />
                     {/* 其他考生端路由可以在这里添加 */}
                   </Routes>
