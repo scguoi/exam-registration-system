@@ -62,3 +62,18 @@ file:
     material-path: materials/
     exam-file-path: exam-files/
     ticket-path: tickets/
+
+# Springdoc OpenAPI配置
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    tags-sorter: alpha
+    operations-sorter: alpha
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.exam.controller

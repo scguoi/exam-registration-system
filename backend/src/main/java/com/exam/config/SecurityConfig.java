@@ -50,6 +50,8 @@ public class SecurityConfig {
             .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             .and()
             .authorizeRequests()
+                // Swagger/OpenAPI接口
+                .antMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 // 公开接口
                 .antMatchers("/v1/users/register", "/v1/users/login", "/v1/notices/**").permitAll()
                 .antMatchers("/v1/exams/available").permitAll()
